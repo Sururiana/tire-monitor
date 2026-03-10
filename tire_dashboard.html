@@ -1731,9 +1731,8 @@ function showInfo(id) {
 // ============================================================
 // INIT — Data dari Google Sheets
 // ============================================================
-const PROXY = "https://corsproxy.io/?";
-const CSV_KENDARAAN = PROXY + encodeURIComponent("https://docs.google.com/spreadsheets/d/e/2PACX-1vRJr1YOPHYiipK5p9DMsRVo-zpun_g1Q-PWIBEz_jDY2bSCLePvLoqTTSPFJWsyiEb7wC51BS9i4etY/pub?gid=0&single=true&output=csv");
-const CSV_BANDATA   = PROXY + encodeURIComponent("https://docs.google.com/spreadsheets/d/e/2PACX-1vRJr1YOPHYiipK5p9DMsRVo-zpun_g1Q-PWIBEz_jDY2bSCLePvLoqTTSPFJWsyiEb7wC51BS9i4etY/pub?gid=1742849813&single=true&output=csv");
+const CSV_KENDARAAN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJr1YOPHYiipK5p9DMsRVo-zpun_g1Q-PWIBEz_jDY2bSCLePvLoqTTSPFJWsyiEb7wC51BS9i4etY/pub?gid=0&single=true&output=csv";
+const CSV_BANDATA   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJr1YOPHYiipK5p9DMsRVo-zpun_g1Q-PWIBEz_jDY2bSCLePvLoqTTSPFJWsyiEb7wC51BS9i4etY/pub?gid=1742849813&single=true&output=csv";
 
 function parseCSV(text) {
   const lines = text.trim().split('\n');
@@ -1799,10 +1798,17 @@ document.getElementById('armadaGrid').innerHTML =
 
 // Fetch dari Google Sheets
 Promise.all([
-  fetch(CSV_KENDARAAN).then(r => r.text()),
-  fetch(CSV_BANDATA).then(r => r.text()),
+  fetch(CSV_KENDARAAN, {mode:'cors', redirect:'follow'}).then(r => r.text()),
+  fetch(CSV_BANDATA,   {mode:'cors', redirect:'follow'}).then(r => r.text()),
 ]).then(([csvK, csvB]) => {
-  const data = buildArmadaFromSheets(parseCSV(csvK), parseCSV(csvB));
+  console.log('CSV Kendaraan sample:', csvK.substring(0, 200));
+  console.log('CSV BanData sample:', csvB.substring(0, 200));
+  const kRows = parseCSV(csvK);
+  const bRows = parseCSV(csvB);
+  console.log('Kendaraan rows:', kRows);
+  console.log('BanData rows:', bRows.slice(0,2));
+  const data = buildArmadaFromSheets(kRows, bRows);
+  console.log('Armada data:', data);
   armadaData.length = 0;
   data.forEach(d => armadaData.push(d));
   buildSummary();
